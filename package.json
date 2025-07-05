@@ -1,0 +1,52 @@
+{
+    "name": "@ludescher/dom",
+    "version": "1.0.0",
+    "description": "A lightweight, highly composable DOM factory that lets you build HTML elements with nested structure, inline styles, dataset attributes, event bindings, and fully typed ref support",
+    "main": "./dist/index.js",
+    "scripts": {
+        "build": "tsc --project tsconfig.json",
+        "watch": "tsc --watch",
+        "test": "jest --passWithNoTests",
+        "test:watch": "jest --watch",
+        "test:coverage": "jest --coverage"
+    },
+    "types": "./dist/index.d.ts",
+    "exports": {
+        ".": {
+            "import": "./dist/index.js",
+            "types": "./dist/index.d.ts"
+        }
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/ludescher/DOM.git"
+    },
+    "keywords": [
+        "DOM"
+    ],
+    "author": "Johannes Ludescher",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/ludescher/DOM/issues"
+    },
+    "homepage": "https://github.com/ludescher/DOM#readme",
+    "devDependencies": {
+        "@types/babel__core": "^7.20.5",
+        "@types/babel__generator": "^7.27.0",
+        "@types/babel__template": "^7.4.4",
+        "@types/babel__traverse": "^7.20.7",
+        "@types/istanbul-lib-coverage": "^2.0.6",
+        "@types/istanbul-lib-report": "^3.0.3",
+        "@types/istanbul-reports": "^3.0.4",
+        "@types/jest": "^30.0.0",
+        "@types/node": "^24.0.10",
+        "@types/stack-utils": "^2.0.3",
+        "@types/yargs": "^17.0.33",
+        "@types/yargs-parser": "^21.0.3",
+        "jest": "^30.0.4",
+        "jest-environment-jsdom": "^30.0.4",
+        "jsdom": "^26.1.0",
+        "ts-jest": "^29.4.0",
+        "ts-node": "^10.9.2"
+    }
+}
