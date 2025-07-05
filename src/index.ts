@@ -13,12 +13,19 @@ type EventsOf<T> = T extends HTMLElement ? {
 } : {};
 
 type ElementOptions<T extends HTMLElement> = {
+    attributes?: Record<string, string>;
     style?: Partial<WritableCSSProperties>;
     dataset?: Record<string, string>;
     ref?: Ref<T>;
-} & Omit<Partial<T>, 'style'> & EventsOf<T>;
+} & Omit<Partial<T>, 'style' | 'attributes'> & EventsOf<T>;
 
-type ElementChildren = ReadonlyArray<Readonly<RecursiveElementObject> | HTMLElement>;
+type ElementChild =
+    | Readonly<RecursiveElementObject>
+    | HTMLElement
+    | Node
+    | string;
+
+type ElementChildren = ReadonlyArray<ElementChild>;
 
 type RecursiveElementObject<T extends TagName = TagName> = Readonly<{
     tagName: T;
@@ -61,7 +68,7 @@ export function createElement<T extends TagName>(
     const el = document.createElement(tagName) as ElementOf<T>;
     const opts = (options ?? {}) as ElementOptions<ElementOf<T>>;
 
-    const { dataset, style, ref, ...rest } = opts;
+    const { attributes, dataset, style, ref, ...rest } = opts;
 
     for (const [key, value] of Object.entries(rest)) {
         if (key.startsWith("on") && typeof value === "function") {
@@ -91,6 +98,12 @@ export function createElement<T extends TagName>(
         }
     }
 
+    if (attributes) {
+        for (const [attr, val] of Object.entries(attributes)) {
+            el.setAttribute(attr, val);
+        }
+    }
+
     for (const child of children ?? []) {
         el.appendChild(resolveChild(child));
     }
@@ -112,10 +125,24 @@ export function createElement<T extends TagName>(
     return el;
 }
 
-export function resolveChild(
-    child: RecursiveElementObject | HTMLElement
-): HTMLElement {
-    return child instanceof HTMLElement
-        ? child
-        : createElement(child.tagName, child.options, child.children);
+export function resolveChild(cfg: Readonly<RecursiveElementObject>): HTMLElement;
+export function resolveChild(el: HTMLElement): HTMLElement;
+export function resolveChild(nd: Node): Node;
+export function resolveChild(str: string): Text;
+export function resolveChild(child: ElementChild): Node;
+
+export function resolveChild(child: ElementChild): Node {
+    if (typeof child === "string") {
+        return document.createTextNode(child);
+    }
+
+    if (child instanceof HTMLElement) {
+        return child;
+    }
+
+    if (child instanceof Node) { // Text or Comment
+        return child;
+    }
+
+    return createElement(child.tagName, child.options, child.children);
 }

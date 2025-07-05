@@ -1,4 +1,159 @@
 import { createElement, appendElement, resolveChild, createElements, appendElements } from "../src";
+import MyWidget from "./MyWidget";
+
+declare global {
+    interface HTMLElementTagNameMap {
+        "my-widget": MyWidget;
+    }
+}
+
+beforeAll(() => {
+    if (!customElements.get("my-widget")) {
+        customElements.define("my-widget", MyWidget);
+    }
+});
+
+describe("MyWidget Web Component (using our DOM factory)", () => {
+    test("attaches an open shadow root and wrapper via ref", () => {
+        const ref = { current: null as MyWidget | null };
+        appendElement(document.body, "my-widget", { ref });
+
+        const widget = ref.current!;
+        expect(widget).toBeInstanceOf(MyWidget);
+        expect(widget.shadowRoot).not.toBeNull();
+
+        const wrapper = widget.shadowRoot!
+            .querySelector<HTMLDivElement>(".wrapper");
+        expect(wrapper).toBeInstanceOf(HTMLDivElement);
+    });
+
+    test("projects slotted content into title & default slots", () => {
+        const ref = { current: null as MyWidget | null };
+        appendElement(document.body, "my-widget", { ref }, [
+            {
+                tagName: "span",
+                options: { slot: "title", textContent: "Slotted Title" }
+            },
+            {
+                tagName: "template", options: {}, children: [
+                    // text nodes must be created manually
+                    // our factory only proxies HTMLElement children
+                ]
+            },
+            // default-text slot: we inject a real text node
+            document.createTextNode("Default paragraph text"),
+            {
+                tagName: "button",
+                options: { slot: "action", textContent: "Action Button" }
+            }
+        ]);
+
+        const widget = ref.current!;
+        const sr = widget.shadowRoot!;
+
+        const titleSlot = sr.querySelector<HTMLSlotElement>(
+            'slot[name="title"]'
+        )!;
+        expect(
+            (titleSlot.assignedElements()[0] as HTMLSpanElement).textContent
+        ).toBe("Slotted Title");
+
+        const defaultSlot = sr.querySelector<HTMLSlotElement>(
+            'slot:not([name])'
+        )!;
+        const textNode = defaultSlot
+            .assignedNodes()
+            .find(n => n.nodeType === Node.TEXT_NODE)!;
+        expect(textNode.textContent!.trim())
+            .toBe("Default paragraph text");
+    });
+
+    test("reflects data-count via dataset into a badge", () => {
+        const ref = { current: null as MyWidget | null };
+        appendElement(document.body, "my-widget", {
+            ref,
+            dataset: { count: "42" }
+        });
+
+        const widget = ref.current!;
+        const badge = widget.shadowRoot!
+            .querySelector<HTMLSpanElement>(".badge")!;
+
+        expect(badge).toBeInstanceOf(HTMLSpanElement);
+        expect(badge.textContent).toBe("42");
+    });
+
+    test("does not create a badge for unrelated attributes", () => {
+        const widget = new MyWidget();
+        document.body.appendChild(widget);
+
+        // setting an unrelated attribute should not create .badge
+        widget.setAttribute("id", "foo");
+        expect(widget.shadowRoot!.querySelector(".badge")).toBeNull();
+    });
+
+    test("updates existing badge text without creating a second badge", () => {
+        const widget = new MyWidget();
+        document.body.appendChild(widget);
+
+        widget.setAttribute("data-count", "1");
+        const firstBadge = widget.shadowRoot!.querySelector(".badge")!;
+        expect(firstBadge.textContent).toBe("1");
+
+        // change it again
+        widget.setAttribute("data-count", "2");
+        const badges = widget.shadowRoot!.querySelectorAll(".badge");
+        expect(badges).toHaveLength(1);               // still only one badge
+        expect(firstBadge.textContent).toBe("2");     // and its text updated
+    });
+
+    test("clears badge text when data-count is removed", () => {
+        const widget = new MyWidget();
+        document.body.appendChild(widget);
+
+        widget.setAttribute("data-count", "7");
+        const badge = widget.shadowRoot!.querySelector(".badge")!;
+        expect(badge.textContent).toBe("7");
+
+        widget.removeAttribute("data-count");
+        expect(badge.textContent).toBe("");          // empty string when val is null
+    });
+
+    test("badge is styled correctly (inline CSS)", () => {
+        const widget = new MyWidget();
+        document.body.appendChild(widget);
+
+        widget.setAttribute("data-count", "9");
+        const badge = widget.shadowRoot!.querySelector<HTMLElement>(".badge")!;
+
+        // verify part of the cssText you injected
+        expect(badge.style.background).toBe("crimson");
+        expect(badge.style.color).toBe("white");
+        expect(badge.style.borderRadius).toBe("50%");
+    });
+
+    test("action slot has inline backgroundColor style", () => {
+        const widget = new MyWidget();
+        document.body.appendChild(widget);
+
+        const actionSlot = widget.shadowRoot!
+            .querySelector<HTMLSlotElement>('slot[name="action"]')!;
+
+        // This reflects the `{ style: { backgroundColor: "blue" } }` in the constructor
+        expect(actionSlot.style.backgroundColor).toBe("blue");
+    });
+
+    test("skips when shadow is falsy", () => {
+        const w = new MyWidget();
+        // hack-remove the private shadow field
+        (w as any).shadow = null;
+        // calling setAttribute would never hit the block, so invoke directly
+        expect(() => w.attributeChangedCallback("data-count", null, "7")).not.toThrow();
+        // still no exception, and nothing was appended to the real shadowRoot
+        expect(w.shadowRoot).not.toBeNull();
+        expect(w.shadowRoot!.querySelector(".badge")).toBeNull();
+    });
+});
 
 describe("DomFactory", () => {
     test("creates a div element", () => {
@@ -234,5 +389,35 @@ describe("DomFactory", () => {
         const parent = document.createElement("div");
         appendElements(parent, []);
         expect(parent.childElementCount).toBe(0);
+    });
+
+    describe("resolveChild string/Node branches", () => {
+        test("resolveChild creates a Text node from a raw string", () => {
+            const textNode = resolveChild("Hello, world!");
+            expect(textNode).toBeInstanceOf(Text);
+            expect(textNode.textContent).toBe("Hello, world!");
+        });
+
+        test("resolveChild preserves non-HTMLElement Node instances (e.g. Comment)", () => {
+            const comment = document.createComment("a comment");
+            const result = resolveChild(comment);
+            expect(result).toBe(comment);
+            expect(result.nodeType).toBe(Node.COMMENT_NODE);
+            expect(result.nodeValue).toBe("a comment");
+        });
+
+        test("createElement accepts string children directly", () => {
+            const p = createElement("p", {}, [
+                "foo",
+                { tagName: "strong", options: { textContent: "bar" }, children: [] },
+                "baz"
+            ]);
+            // Should yield: Text("foo") → <strong>bar</strong> → Text("baz")
+            expect(p.childNodes).toHaveLength(3);
+            expect(p.childNodes[0]).toBeInstanceOf(Text);
+            expect(p.childNodes[0].textContent).toBe("foo");
+            expect((p.childNodes[1] as HTMLElement).tagName).toBe("STRONG");
+            expect(p.childNodes[2].textContent).toBe("baz");
+        });
     });
 });
