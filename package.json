@@ -2,7 +2,7 @@
     "name": "@ludescher/dom",
     "version": "1.0.0",
     "description": "A lightweight, highly composable DOM factory that lets you build HTML elements with nested structure, inline styles, dataset attributes, event bindings, and fully typed ref support",
-    "main": "./dist/index.js",
+    "main": "index.js",
     "scripts": {
         "build": "tsc --project tsconfig.json",
         "watch": "tsc --watch",
@@ -10,11 +10,11 @@
         "test:watch": "jest --watch",
         "test:coverage": "jest --coverage"
     },
-    "types": "./dist/index.d.ts",
+    "types": "index.ts",
     "exports": {
         ".": {
-            "import": "./dist/index.js",
-            "types": "./dist/index.d.ts"
+            "import": "./index.js",
+            "types": "./index.ts"
         }
     },
     "repository": {
