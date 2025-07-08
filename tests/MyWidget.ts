@@ -1,4 +1,4 @@
-import { createElement } from "../src";
+import { createElement } from "../src/DomFactory";
 
 class MyWidget extends HTMLElement {
     private shadow: ShadowRoot;

@@ -1,4 +1,4 @@
-import { createElement, appendElement, resolveChild, createElements, appendElements } from "../src";
+import { createElement, appendElement, resolveChild, createElements, appendElements } from "../src/DomFactory";
 import MyWidget from "./MyWidget";
 
 declare global {

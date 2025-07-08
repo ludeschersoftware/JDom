@@ -1,72 +1,44 @@
-type TagName = keyof HTMLElementTagNameMap;
-type ElementOf<T extends TagName> = HTMLElementTagNameMap[T];
-type Ref<T> = { readonly current: T | null; } | ((el: T) => void);
+import TElementChild from "./TElementChild";
+import TElementChildren from "./TElementChildren";
+import TElementOf from "./TElementOf";
+import TElementOptions from "./TElementOptions";
+import TRecursiveElementObject from "./TRecursiveElementObject";
+import TTagName from "./TTagName";
 
-type WritableCSSProperties = {
-    [K in keyof CSSStyleDeclaration as
-    CSSStyleDeclaration[K] extends string ? (readonly [K] extends [never] ? K : never) : never
-    ]: CSSStyleDeclaration[K];
-};
-
-type EventsOf<T> = T extends HTMLElement ? {
-    [K in keyof HTMLElementEventMap as `on${K}`]?: (ev: HTMLElementEventMap[K]) => any;
-} : {};
-
-type ElementOptions<T extends HTMLElement> = {
-    attributes?: Record<string, string>;
-    style?: Partial<WritableCSSProperties>;
-    dataset?: Record<string, string>;
-    ref?: Ref<T>;
-} & Omit<Partial<T>, 'style' | 'attributes'> & EventsOf<T>;
-
-type ElementChild =
-    | Readonly<RecursiveElementObject>
-    | HTMLElement
-    | Node
-    | string;
-
-type ElementChildren = ReadonlyArray<ElementChild>;
-
-type RecursiveElementObject<T extends TagName = TagName> = Readonly<{
-    tagName: T;
-    options?: ElementOptions<ElementOf<T>>;
-    children?: ElementChildren;
-}>;
-
-export function appendElements<Cfgs extends ReadonlyArray<RecursiveElementObject>>(
+export function appendElements<Cfgs extends ReadonlyArray<TRecursiveElementObject>>(
     parent: HTMLElement,
     data: Cfgs
 ): void {
     data.forEach(cfg => parent.appendChild(createElement(cfg.tagName, cfg.options, cfg.children)));
 }
 
-export function appendElement<T extends TagName>(
+export function appendElement<T extends TTagName>(
     parent: HTMLElement,
     tagName: T,
-    options?: Readonly<ElementOptions<ElementOf<T>>>,
-    children?: Readonly<ElementChildren>
+    options?: Readonly<TElementOptions<TElementOf<T>>>,
+    children?: Readonly<TElementChildren>
 ): void {
     parent.appendChild(createElement(tagName, options, children));
 }
 
-export function createElements<Cfgs extends ReadonlyArray<RecursiveElementObject>>(
+export function createElements<Cfgs extends ReadonlyArray<TRecursiveElementObject>>(
     data: Cfgs
 ): {
         [K in keyof Cfgs]:
-        Cfgs[K] extends RecursiveElementObject<infer U>
-        ? ElementOf<U>
+        Cfgs[K] extends TRecursiveElementObject<infer U>
+        ? TElementOf<U>
         : never
     } {
     return data.map(cfg => createElement(cfg.tagName, cfg.options, cfg.children)) as any;
 }
 
-export function createElement<T extends TagName>(
+export function createElement<T extends TTagName>(
     tagName: T,
-    options?: Readonly<ElementOptions<ElementOf<T>>>,
-    children?: Readonly<ElementChildren>
-): ElementOf<T> {
-    const el = document.createElement(tagName) as ElementOf<T>;
-    const opts = (options ?? {}) as ElementOptions<ElementOf<T>>;
+    options?: Readonly<TElementOptions<TElementOf<T>>>,
+    children?: Readonly<TElementChildren>
+): TElementOf<T> {
+    const el = document.createElement(tagName) as TElementOf<T>;
+    const opts = (options ?? {}) as TElementOptions<TElementOf<T>>;
 
     const { attributes, dataset, style, ref, ...rest } = opts;
 
@@ -125,13 +97,13 @@ export function createElement<T extends TagName>(
     return el;
 }
 
-export function resolveChild(cfg: Readonly<RecursiveElementObject>): HTMLElement;
+export function resolveChild(cfg: Readonly<TRecursiveElementObject>): HTMLElement;
 export function resolveChild(el: HTMLElement): HTMLElement;
 export function resolveChild(nd: Node): Node;
 export function resolveChild(str: string): Text;
-export function resolveChild(child: ElementChild): Node;
+export function resolveChild(child: TElementChild): Node;
 
-export function resolveChild(child: ElementChild): Node {
+export function resolveChild(child: TElementChild): Node {
     if (typeof child === "string") {
         return document.createTextNode(child);
     }
