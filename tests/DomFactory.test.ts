@@ -302,7 +302,7 @@ describe("DomFactory", () => {
         expect(parent.querySelector("#child")).not.toBeNull();
     });
 
-    test("resolveChild creates from RecursiveElementObject", () => {
+    test("resolveChild creates from TRecursiveElementObject", () => {
         const child = { tagName: "p", options: { textContent: "Hi" } } as const;
         const el = (resolveChild(child));
         expect(el.tagName).toBe("P");

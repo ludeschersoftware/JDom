@@ -55,35 +55,35 @@ appendElement(
 
 ## API Reference
 
-| Function       | Signature                                                           | Return              | Notes                                               |
-| -------------- | ------------------------------------------------------------------- | ------------------- | --------------------------------------------------- |
-| createElement  | `createElement<T extends TagName>(tagName: T, options?, children?)` | `ElementOf<T>`      | Core builder, returns a typed HTML element          |
-| createElements | `createElements<Cfgs extends RecursiveElementObject[]>(data: Cfgs)` | Typed element array | Builds multiple elements at once                    |
-| appendElement  | `appendElement(parent, tagName, options?, children?)`               | `void`              | Shorthand: `parent.appendChild(createElement(...))` |
-| appendElements | `appendElements(parent, data: RecursiveElementObject[])`            | `void`              | Shorthand for batching multiple `appendChild` calls |
+| Function       | Signature                                                            | Return              | Notes                                               |
+| -------------- | -------------------------------------------------------------------- | ------------------- | --------------------------------------------------- |
+| createElement  | `createElement<T extends TTagName>(tagName: T, options?, children?)` | `TElementOf<T>`     | Core builder, returns a typed HTML element          |
+| createElements | `createElements<Cfgs extends TRecursiveElementObject[]>(data: Cfgs)` | Typed element array | Builds multiple elements at once                    |
+| appendElement  | `appendElement(parent, tagName, options?, children?)`                | `void`              | Shorthand: `parent.appendChild(createElement(...))` |
+| appendElements | `appendElements(parent, data: TRecursiveElementObject[])`            | `void`              | Shorthand for batching multiple `appendChild` calls |
 
 ---
 
 ### Core Types
 
 ```ts
-type TagName = keyof HTMLElementTagNameMap;
-type ElementOf<T extends TagName> = HTMLElementTagNameMap[T];
+type TTagName = keyof HTMLElementTagNameMap;
+type TElementOf<T extends TTagName> = HTMLElementTagNameMap[T];
 
-interface RecursiveElementObject<T extends TagName = TagName> {
+interface TRecursiveElementObject<T extends TTagName = TTagName> {
   readonly tagName: T;
-  readonly options?: ElementOptions<ElementOf<T>>;
-  readonly children?: ElementChildren;
+  readonly options?: TElementOptions<TElementOf<T>>;
+  readonly children?: TElementChildren;
 }
 
-type ElementChild = RecursiveElementObject | HTMLElement | Node | string;
-type ElementChildren = readonly ElementChild[];
+type TElementChild = TRecursiveElementObject | HTMLElement | Node | string;
+type TElementChildren = readonly TElementChild[];
 
-interface ElementOptions<T extends HTMLElement> {
+interface TElementOptions<T extends HTMLElement> {
   attributes?: Record<string, string>; // arbitrary HTML attributes
-  style?: Partial<WritableCSSProperties>; // CSS-in-JS style object
+  style?: Partial<TWritableCSSProperties>; // CSS-in-JS style object
   dataset?: Record<string, string>; // data-* attributes
-  ref?: Ref<T>; // callback or mutable ref object
+  ref?: TRef<T>; // callback or mutable ref object
   // … plus any partial HTMLElement props and on<Event> handlers
 }
 ```
@@ -103,7 +103,7 @@ Children can be:
 
 - Plain strings (converted to `Text` nodes)
 - Existing `HTMLElement` or any `Node` (passed through)
-- Nested configs (`RecursiveElementObject`) for deep trees
+- Nested configs (`TRecursiveElementObject`) for deep trees
 
 ```ts
 // Mixed children: text, element, nested config
@@ -166,7 +166,7 @@ appendElement(document.body, "ul", {}, lis);
 ## Advanced Example: Nested Component Tree
 
 ```ts
-const tree: RecursiveElementObject[] = [
+const tree: TRecursiveElementObject[] = [
   {
     tagName: "section",
     options: { id: "main" },
