@@ -19,7 +19,7 @@
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/ludescher/DOM.git"
+        "url": "git+https://github.com/ludescher/JDom.git"
     },
     "keywords": [
         "DOM"
@@ -27,9 +27,9 @@
     "author": "Johannes Ludescher",
     "license": "MIT",
     "bugs": {
-        "url": "https://github.com/ludescher/DOM/issues"
+        "url": "https://github.com/ludescher/JDom/issues"
     },
-    "homepage": "https://github.com/ludescher/DOM#readme",
+    "homepage": "https://github.com/ludescher/JDom#readme",
     "devDependencies": {
         "@types/babel__core": "^7.20.5",
         "@types/babel__generator": "^7.27.0",
