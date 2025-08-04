@@ -1,5 +1,5 @@
 import { appendElement, appendElements, createElement, createElements } from "./dist/DomFactory";
-import TRef from "./dist/TRef";
+import type TRef from "./dist/TRef.d.ts";
 
 export {
     appendElement,
