@@ -1,0 +1,1 @@
+{"version":3,"file":"TWritableCSSProperties.d.ts","sourceRoot":"","sources":["../src/TWritableCSSProperties.ts"],"names":[],"mappings":"AAAA,KAAK,sBAAsB,GAAG;KACzB,CAAC,IAAI,MAAM,mBAAmB,IAC/B,mBAAmB,CAAC,CAAC,CAAC,SAAS,MAAM,GAAG,CAAC,SAAS,CAAC,CAAC,CAAC,SAAS,CAAC,KAAK,CAAC,GAAG,CAAC,GAAG,KAAK,CAAC,GAAG,KAAK,GACvF,mBAAmB,CAAC,CAAC,CAAC;CAC5B,CAAC;AAEF,eAAe,sBAAsB,CAAC"}
