@@ -571,14 +571,15 @@ describe("DOM Helper Library - Edge Cases", () => {
         expect(div.textContent).toBe("");
     });
 
-    it("should throw on unknown properties in options", () => {
-        expect(() =>
-            createElement("span", {
-                textContent: "Hello",
-                // @ts-expect-error
-                unknownProp: "value" as any,
-            })
-        ).toThrow(`Unknown property "unknownProp" for: HTMLSpanElement`);
+    it("should ignore unknown properties in options", () => {
+        const span = createElement("span", {
+            textContent: "Hello",
+            // @ts-expect-error
+            unknownProp: "value" as any,
+        });
+
+        expect(span.textContent).toBe("Hello");
+        expect((span as any).unknownProp).toBeUndefined();
     });
 
     it("should handle null or undefined children", () => {
@@ -593,13 +594,16 @@ describe("DOM Helper Library - Edge Cases", () => {
         expect(() => appendElement(null as any, "div", {}, [child])).toThrow();
     });
 
-    it("should throw on falsy children in createElements", () => {
-        expect(() => createElements([
+    it("should skip falsy children in createElements", () => {
+        const elements = createElements([
             null as any,
             undefined as any,
             false as any,
             { tagName: "span", options: { textContent: "Valid" }, children: [] },
-        ])).toThrow(TypeError);
+        ]);
+
+        expect(elements.length).toBe(1);
+        expect(elements[0].textContent).toBe("Valid");
     });
 
     it("should handle empty children array", () => {

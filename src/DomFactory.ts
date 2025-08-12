@@ -9,7 +9,9 @@ export function appendElements<Cfgs extends ReadonlyArray<TRecursiveElementObjec
     parent: HTMLElement,
     data: Cfgs
 ): void {
-    data.forEach(cfg => parent.appendChild(createElement(cfg.tagName, cfg.options, cfg.children)));
+    data
+        .filter(cfg => (cfg && (typeof cfg === "object")))
+        .map(cfg => parent.appendChild(createElement(cfg.tagName, cfg.options, cfg.children)));
 }
 
 export function appendElement<T extends TTagName>(
@@ -29,7 +31,9 @@ export function createElements<Cfgs extends ReadonlyArray<TRecursiveElementObjec
         ? TElementOf<U>
         : never
     } {
-    return data.map(cfg => createElement(cfg.tagName, cfg.options, cfg.children)) as any;
+    return data
+        .filter(cfg => (cfg && (typeof cfg === "object")))
+        .map(cfg => createElement(cfg.tagName, cfg.options, cfg.children)) as any;
 }
 
 export function createElement<T extends TTagName>(
@@ -53,9 +57,7 @@ export function createElement<T extends TTagName>(
             }
         } else if (key in el) {
             (el as any)[key] = value;
-        } else {
-            throw new Error(`Unknown property "${key}" for: ${el.constructor.name}`);
-        }
+        } // else ignore
     }
 
     if (style) {
