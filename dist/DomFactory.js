@@ -1,11 +1,15 @@
 export function appendElements(parent, data) {
-    data.forEach(cfg => parent.appendChild(createElement(cfg.tagName, cfg.options, cfg.children)));
+    data
+        .filter(cfg => (cfg && (typeof cfg === "object")))
+        .map(cfg => parent.appendChild(createElement(cfg.tagName, cfg.options, cfg.children)));
 }
 export function appendElement(parent, tagName, options, children) {
     parent.appendChild(createElement(tagName, options, children));
 }
 export function createElements(data) {
-    return data.map(cfg => createElement(cfg.tagName, cfg.options, cfg.children));
+    return data
+        .filter(cfg => (cfg && (typeof cfg === "object")))
+        .map(cfg => createElement(cfg.tagName, cfg.options, cfg.children));
 }
 export function createElement(tagName, options, children) {
     const el = document.createElement(tagName);
@@ -23,9 +27,6 @@ export function createElement(tagName, options, children) {
         }
         else if (key in el) {
             el[key] = value;
-        }
-        else {
-            throw new Error(`Unknown property "${key}" for: ${el.constructor.name}`);
         }
     }
     if (style) {
