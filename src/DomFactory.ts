@@ -46,13 +46,15 @@ export function createElement<T extends TTagName>(
         if (key.startsWith("on") && typeof value === "function") {
             const eventName = key.slice(2) as keyof HTMLElementEventMap;
 
-            if (eventName in el) {
+            if (key in el) {
                 el.addEventListener(eventName, value as EventListener);
             } else {
                 throw new Error(`Unknown event "${eventName}" for: ${el.constructor.name}`);
             }
-        } else {
+        } else if (key in el) {
             (el as any)[key] = value;
+        } else {
+            throw new Error(`Unknown property "${key}" for: ${el.constructor.name}`);
         }
     }
 
@@ -60,7 +62,7 @@ export function createElement<T extends TTagName>(
         Object.assign(el.style, style);
     }
 
-    if (dataset) {
+    if (typeof dataset === "object") {
         for (const [k, v] of Object.entries(dataset)) {
             if (typeof v === "string") {
                 el.dataset[k] = v;
@@ -70,14 +72,16 @@ export function createElement<T extends TTagName>(
         }
     }
 
-    if (attributes) {
+    if (typeof attributes === "object") {
         for (const [attr, val] of Object.entries(attributes)) {
             el.setAttribute(attr, val);
         }
     }
 
     for (const child of children ?? []) {
-        el.appendChild(resolveChild(child));
+        if (child) {
+            el.appendChild(resolveChild(child));
+        }
     }
 
     if (ref) {

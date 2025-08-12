@@ -421,3 +421,267 @@ describe("DomFactory", () => {
         });
     });
 });
+
+describe("DOM Helper Library", () => {
+    it("should create a styled button with click handler", () => {
+        const btn = createElement("button", {
+            textContent: "Click Me",
+            style: { backgroundColor: "navy", color: "white", padding: "0.5em 1em" },
+            onclick: jest.fn(),
+        });
+
+        expect(btn).toBeInstanceOf(HTMLButtonElement);
+        expect(btn.textContent).toBe("Click Me");
+        expect(btn.style.backgroundColor).toBe("navy");
+        expect(typeof btn.click).toBe("function");
+    });
+
+    it("should append a list of <li> items to a <ul>", () => {
+        const items = ["Apple", "Banana", "Cherry"];
+
+        appendElement(
+            document.body,
+            "ul",
+            {},
+            createElements(
+                items.map((item) => ({
+                    tagName: "li",
+                    options: { textContent: item },
+                    children: [],
+                }))
+            )
+        );
+
+        const appendedUl = document.body.querySelector("ul");
+        expect(appendedUl).not.toBeNull();
+        expect(appendedUl?.children.length).toBe(3);
+    });
+
+    it("should create mixed children in a <p> element", () => {
+        const strong = document.createElement("strong");
+        const p = createElement("p", {}, [
+            "Hello, ",
+            strong,
+            { tagName: "em", options: { textContent: "world" }, children: [] },
+        ]);
+
+        expect(p).toBeInstanceOf(HTMLParagraphElement);
+        expect(p.childNodes.length).toBe(3);
+        expect(p.textContent).toContain("Hello, world");
+    });
+
+    it("should create an input with props, events, attributes, and dataset", () => {
+        const input = createElement("input", {
+            type: "checkbox",
+            checked: true,
+            onchange: jest.fn(),
+            attributes: { id: "agree", "aria-label": "Agree" },
+            dataset: { toggle: "yes" },
+        });
+
+        expect(input).toBeInstanceOf(HTMLInputElement);
+        expect(input.checked).toBe(true);
+        expect(input.id).toBe("agree");
+        expect(input.dataset["toggle"]).toBe("yes");
+    });
+
+    it("should apply styles and dataset to a div", () => {
+        const div = createElement("div", {
+            style: { display: "flex", gap: "1em", padding: "1em" },
+            dataset: { userId: "42", role: "admin" },
+        });
+
+        expect(div.style.display).toBe("flex");
+        expect(div.dataset["userId"]).toBe("42");
+        expect(div.dataset["role"]).toBe("admin");
+    });
+
+    it("should assign refs correctly", () => {
+        const refObj = { current: null as HTMLButtonElement | null };
+        const refFn = jest.fn();
+
+        const btn1 = createElement("button", { ref: refObj }, ["OK"]);
+        const btn2 = createElement("button", { ref: refFn }, ["Cancel"]);
+
+        expect(refObj.current).toBe(btn1);
+        expect(refFn).toHaveBeenCalledWith(btn2);
+    });
+
+    it("should batch create and append <li> elements", () => {
+        const lis = createElements([
+            { tagName: "li", options: { textContent: "One" }, children: [] },
+            { tagName: "li", options: { textContent: "Two" }, children: [] },
+        ]);
+
+        appendElement(document.body, "ul", { className: "batch-create" }, lis);
+
+        const ul = document.body.querySelector("ul.batch-create");
+        expect(ul?.children.length).toBe(2);
+        expect(ul?.textContent).toContain("One");
+        expect(ul?.textContent).toContain("Two");
+    });
+
+    it("should render a nested component tree", () => {
+        appendElements(document.body, [
+            {
+                tagName: "section",
+                options: { id: "main" },
+                children: [
+                    {
+                        tagName: "h1",
+                        options: { textContent: "Dashboard" },
+                        children: [],
+                    },
+                    {
+                        tagName: "div",
+                        options: { className: "cards", style: { display: "grid", gap: "1em" } },
+                        children: [
+                            {
+                                tagName: "article",
+                                options: { className: "card" },
+                                children: [
+                                    { tagName: "h2", options: { textContent: "Card 1" }, children: [] },
+                                    { tagName: "p", options: { textContent: "Details about card 1" }, children: [] },
+                                ],
+                            },
+                            {
+                                tagName: "article",
+                                options: { className: "card" },
+                                children: [
+                                    { tagName: "h2", options: { textContent: "Card 2" }, children: [] },
+                                    { tagName: "p", options: { textContent: "Details about card 2" }, children: [] },
+                                ],
+                            },
+                        ],
+                    },
+                ],
+            },
+        ]);
+
+        const section = document.body.querySelector("section#main");
+        expect(section).not.toBeNull();
+        expect(section?.querySelectorAll("article.card").length).toBe(2);
+    });
+});
+
+describe("DOM Helper Library - Edge Cases", () => {
+    it("should handle missing options gracefully", () => {
+        const div = createElement("div");
+        expect(div).toBeInstanceOf(HTMLDivElement);
+        expect(div.textContent).toBe("");
+    });
+
+    it("should throw on unknown properties in options", () => {
+        expect(() =>
+            createElement("span", {
+                textContent: "Hello",
+                // @ts-expect-error
+                unknownProp: "value" as any,
+            })
+        ).toThrow(`Unknown property "unknownProp" for: HTMLSpanElement`);
+    });
+
+    it("should handle null or undefined children", () => {
+        // @ts-expect-error
+        const div = createElement("div", {}, [null, undefined, "Text"]);
+        expect(div.childNodes.length).toBe(1);
+        expect(div.textContent).toBe("Text");
+    });
+
+    it("should not fail when appending to a null parent", () => {
+        const child = createElement("p", { textContent: "Oops" });
+        expect(() => appendElement(null as any, "div", {}, [child])).toThrow();
+    });
+
+    it("should throw on falsy children in createElements", () => {
+        expect(() => createElements([
+            null as any,
+            undefined as any,
+            false as any,
+            { tagName: "span", options: { textContent: "Valid" }, children: [] },
+        ])).toThrow(TypeError);
+    });
+
+    it("should handle empty children array", () => {
+        const ul = createElement("ul", {}, []);
+        expect(ul.children.length).toBe(0);
+    });
+
+    it("should not crash with empty tagName in createElements", () => {
+        expect(() =>
+            createElements([
+                // @ts-expect-error
+                { tagName: "", options: {}, children: [] },
+            ])
+        ).toThrow();
+    });
+
+    it("should handle deeply nested children", () => {
+        appendElements(document.body, [
+            {
+                tagName: "div",
+                options: { id: "root" },
+                children: [
+                    {
+                        tagName: "section",
+                        options: {},
+                        children: [
+                            {
+                                tagName: "article",
+                                options: {},
+                                children: [
+                                    {
+                                        tagName: "p",
+                                        options: { textContent: "Deep content" },
+                                        children: [],
+                                    },
+                                ],
+                            },
+                        ],
+                    },
+                ],
+            },
+        ]);
+        const p = document.body.querySelector("#root section article p");
+        expect(p?.textContent).toBe("Deep content");
+    });
+
+    it("should handle multiple refs in one call", () => {
+        const ref1 = { current: null as HTMLDivElement | null };
+        const ref2 = jest.fn();
+
+        const div = createElement("div", {
+            ref: (el) => {
+                ref1.current = el;
+                ref2(el);
+            },
+        });
+
+        expect(ref1.current).toBe(div);
+        expect(ref2).toHaveBeenCalledWith(div);
+    });
+
+    it("should not apply dataset if not an object", () => {
+        const div = createElement("div", {
+            dataset: "not-an-object" as any,
+        });
+
+        expect(Object.keys(div.dataset).length).toBe(0);
+    });
+
+    it("should not apply attributes if not an object", () => {
+        const div = createElement("div", {
+            attributes: "invalid" as any,
+        });
+
+        expect(div.getAttributeNames().length).toBe(0);
+    });
+
+    it("should not apply style if not an object", () => {
+        const div = createElement("div", {
+            style: "color: red;" as any,
+        });
+
+        expect(div.getAttribute("style")).toBeNull();
+    });
+});

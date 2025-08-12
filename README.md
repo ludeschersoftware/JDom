@@ -10,9 +10,9 @@ A lightweight, fully-typed DOM helper library for creating and appending HTML el
 ## Installation
 
 ```bash
-npm install @ludescher/dom
+npm install @ludeschersoftware/dom
 # or
-yarn add @ludescher/dom
+yarn add @ludeschersoftware/dom
 ```
 
 ---
@@ -25,7 +25,7 @@ import {
   appendElement,
   createElements,
   appendElements,
-} from "@ludescher/dom";
+} from "@ludeschersoftware/dom";
 
 // 1) Create a <button> with text, style, click handler
 const btn = createElement("button", {
