@@ -166,7 +166,7 @@ appendElement(document.body, "ul", {}, lis);
 ## Advanced Example: Nested Component Tree
 
 ```ts
-const tree: TRecursiveElementObject[] = [
+appendElements(document.body, [
   {
     tagName: "section",
     options: { id: "main" },
@@ -216,10 +216,7 @@ const tree: TRecursiveElementObject[] = [
       },
     ],
   },
-];
-
-// render it all
-appendElements(document.body, tree);
+]);
 ```
 
 ---
