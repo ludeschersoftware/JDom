@@ -1,6 +1,6 @@
 {
     "name": "@ludeschersoftware/dom",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "description": "A lightweight, highly composable DOM factory that lets you build HTML elements with nested structure, inline styles, dataset attributes, event bindings, and fully typed ref support",
     "publishConfig": {
         "access": "public"
@@ -22,7 +22,7 @@
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/ludescher/JDom.git"
+        "url": "git+https://github.com/ludeschersoftware/JDom.git"
     },
     "keywords": [
         "DOM"
@@ -30,9 +30,9 @@
     "author": "Johannes Ludescher",
     "license": "MIT",
     "bugs": {
-        "url": "https://github.com/ludescher/JDom/issues"
+        "url": "https://github.com/ludeschersoftware/JDom/issues"
     },
-    "homepage": "https://github.com/ludescher/JDom#readme",
+    "homepage": "https://github.com/ludeschersoftware/JDom#readme",
     "devDependencies": {
         "@types/babel__core": "^7.20.5",
         "@types/babel__generator": "^7.27.0",
