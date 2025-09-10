@@ -1,6 +1,6 @@
 {
     "name": "@ludeschersoftware/dom",
-    "version": "1.0.3",
+    "version": "1.1.0",
     "description": "A lightweight, highly composable DOM factory that lets you build HTML elements with nested structure, inline styles, dataset attributes, event bindings, and fully typed ref support",
     "publishConfig": {
         "access": "public"

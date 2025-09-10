@@ -8,10 +8,16 @@ import TTagName from "./TTagName";
 export function appendElements<Cfgs extends ReadonlyArray<TRecursiveElementObject>>(
     parent: HTMLElement,
     data: Cfgs
-): void {
+): Array<TElementOf<any>> {
+    const ELEMENTS: Array<TElementOf<any>> = [];
+
     data
         .filter(cfg => (cfg && (typeof cfg === "object")))
-        .map(cfg => parent.appendChild(createElement(cfg.tagName, cfg.options, cfg.children)));
+        .map(cfg => {
+            ELEMENTS.push(appendElement(parent, cfg.tagName, cfg.options, cfg.children));
+        });
+
+    return ELEMENTS;
 }
 
 export function appendElement<T extends TTagName>(
@@ -19,8 +25,12 @@ export function appendElement<T extends TTagName>(
     tagName: T,
     options?: Readonly<TElementOptions<TElementOf<T>>>,
     children?: Readonly<TElementChildren>
-): void {
-    parent.appendChild(createElement(tagName, options, children));
+): TElementOf<T> {
+    const ELEMENT: TElementOf<T> = createElement(tagName, options, children);
+
+    parent.appendChild(ELEMENT);
+
+    return ELEMENT;
 }
 
 export function createElements<Cfgs extends ReadonlyArray<TRecursiveElementObject>>(
